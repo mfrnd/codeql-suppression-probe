@@ -90,5 +90,14 @@ namespace Probe
                 3;
             return 0;
         }
+
+        // c11: two rule ids in one comment, no space after the comma.
+        public static int C11()
+        {
+            var value = Left() ? 1 : 2;
+            // codeql[cs/non-short-circuit,cs/useless-assignment-to-local] measured: two ids, no space
+            value = 3;
+            return 0;
+        }
     }
 }
