@@ -106,5 +106,13 @@ namespace Probe
             // codeql[cs/non-short-circuit] measured: put to review
             return third & Right();
         }
+
+        // c15: added while the review job can only read.
+        public static bool C15()
+        {
+            var fourth = Right();
+            // codeql[cs/non-short-circuit] measured: a read-only token
+            return fourth & Left();
+        }
     }
 }
