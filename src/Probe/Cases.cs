@@ -99,5 +99,20 @@ namespace Probe
             value = 3;
             return 0;
         }
+
+        // c12: on a pull request, a new finding suppressed.
+        public static bool C12()
+        {
+            var first = Left();
+            // codeql[cs/non-short-circuit] measured: suppressed on a pull request
+            return first & Right();
+        }
+
+        // c13: on a pull request, a new finding not suppressed.
+        public static bool C13()
+        {
+            var second = Right();
+            return second & Left();
+        }
     }
 }
