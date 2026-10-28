@@ -1,0 +1,14 @@
+name: old
+
+# Pinned to an old release so that Dependabot proposes a newer one.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nothing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0

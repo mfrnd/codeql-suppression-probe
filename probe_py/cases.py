@@ -27,3 +27,8 @@ def p4() -> None:
 def p5() -> None:
     # codeql[py/unused-import,py/unused-local-variable] measured: two ids, no space
     value = 1
+
+
+# p6: an lgtm suppression added by a pull request.
+def p6() -> None:
+    value = 1  # lgtm[py/unused-local-variable] measured: put to review

@@ -12,7 +12,7 @@ namespace Probe
         {
             var value = Left() ? 1 : 2;
             // codeql[cs/useless-assignment-to-local] measured: the line before
-            value = 3;
+            value = 4;
             return 0;
         }
 
@@ -64,7 +64,6 @@ namespace Probe
         {
             var value = Left() ? 1 : 2;
             // codeql[cs/non-short-circuit] measured: the wrong id
-            value = 3;
             return 0;
         }
 
@@ -98,6 +97,22 @@ namespace Probe
             // codeql[cs/non-short-circuit,cs/useless-assignment-to-local] measured: two ids, no space
             value = 3;
             return 0;
+        }
+
+        // c14: a suppression added by a pull request, for the review job.
+        public static bool C14()
+        {
+            var third = Left();
+            // codeql[cs/non-short-circuit] measured: put to review
+            return third & Right();
+        }
+
+        // c15: added while the review job can only read.
+        public static bool C15()
+        {
+            var fourth = Right();
+            // codeql[cs/non-short-circuit] measured: a read-only token
+            return fourth & Left();
         }
     }
 }
