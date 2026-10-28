@@ -70,13 +70,13 @@ namespace Probe
         // c8: an error-level finding, suppressed.
         public static bool C8()
         {
-            // codeql[cs/non-short-circuit] measured: an error
             return Left() & Right();
         }
 
         // c9: an error-level finding, not suppressed.
         public static bool C9()
         {
+            // codeql[cs/non-short-circuit] measured: added above a finding main already has
             return Left() & Right();
         }
 
