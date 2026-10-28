@@ -45,21 +45,36 @@ jobs:
         with:
           category: /language:${{ matrix.language }}
           output: sarif-results
+          upload: failure-only
 
-      - name: what the SARIF marks suppressed
-        run: |
-          ls sarif-results
-          jq -r '.runs[].results[] | [.ruleId, .locations[0].physicalLocation.artifactLocation.uri, (.locations[0].physicalLocation.region.startLine|tostring), ((.suppressions // []) | map(.kind + ":" + (.status // "")) | join(","))] | @tsv' sarif-results/*.sarif
+      - name: drop what the code suppresses
+        run: python3 tools/filter_sarif.py sarif-results/${{ matrix.language }}.sarif filtered/${{ matrix.language }}.sarif
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: sarif-${{ matrix.language }}
-          path: sarif-results
+          path: |
+            sarif-results
+            filtered
 
-      - name: dismiss suppressed alerts
-        uses: advanced-security/dismiss-alerts@a18f986bdb40edba0dd7a74382c15d4a3d50a1c8 # v2.0.3
+      - id: upload
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
-          sarif-id: ${{ steps.analyze.outputs.sarif-id }}
-          sarif-file: sarif-results/${{ matrix.language }}.sarif
+          sarif_file: filtered/${{ matrix.language }}.sarif
+          category: /language:${{ matrix.language }}
+          wait-for-processing: true
+
+      - name: the upload landed, and nothing security is suppressed
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          SARIF_ID: ${{ steps.upload.outputs.sarif-id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/code-scanning/sarifs/$SARIF_ID"
+          echo
+          status=$(gh api "repos/$GITHUB_REPOSITORY/code-scanning/sarifs/$SARIF_ID" --jq .processing_status)
+          [ "$status" = complete ] || { echo "::error::processing ended as $status"; exit 1; }
+          for url in $(gh api "repos/$GITHUB_REPOSITORY/code-scanning/sarifs/$SARIF_ID" --jq '.analyses_url // empty'); do
+            gh api "$url" --jq '.[] | "analysis \(.id): \(.results_count) results, error \"\(.error)\""'
+            [ -z "$(gh api "$url" --jq '[.[] | select(.error != "")] | .[0].error // empty')" ] || { echo "::error::the analysis failed"; exit 1; }
+          done
+          if [ -f filtered/refused ]; then cat filtered/refused; exit 1; fi
