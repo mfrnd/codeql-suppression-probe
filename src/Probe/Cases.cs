@@ -11,7 +11,6 @@ namespace Probe
         public static int C1()
         {
             var value = Left() ? 1 : 2;
-            // codeql[cs/useless-assignment-to-local] measured: the line before
             value = 4;
             return 0;
         }
@@ -20,6 +19,7 @@ namespace Probe
         public static int C2()
         {
             var value = Left() ? 1 : 2;
+            // codeql[cs/useless-assignment-to-local] measured: added above a finding main has open
             value = 3;
             return 0;
         }
@@ -104,7 +104,7 @@ namespace Probe
         {
             var third = Left();
             // codeql[cs/non-short-circuit] measured: put to review
-            return third & Right();
+            return third & Left();
         }
 
         // c15: added while the review job can only read.
@@ -112,7 +112,17 @@ namespace Probe
         {
             var fourth = Right();
             // codeql[cs/non-short-circuit] measured: a read-only token
-            return fourth & Left();
+            return Left() & fourth;
+        }
+
+        // c16: a new finding, suppressed with a reason longer than a dismissal comment takes.
+        public static int C16()
+        {
+            var value = Left() ? 1 : 2;
+            System.Console.WriteLine(value);
+            // codeql[cs/useless-assignment-to-local] measured: a long reason, written out to see what GitHub does with a dismissal comment past its limit, which the documentation puts at two hundred and eighty characters; this sentence goes on until it is well past that, so that the cut, if there is one, falls inside it and not at its end.
+            value = 5;
+            return 0;
         }
     }
 }
