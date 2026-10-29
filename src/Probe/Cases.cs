@@ -104,7 +104,7 @@ namespace Probe
         {
             var third = Left();
             // codeql[cs/non-short-circuit] measured: put to review
-            return Right() & third;
+            return third & Left();
         }
 
         // c15: added while the review job can only read.
@@ -112,7 +112,7 @@ namespace Probe
         {
             var fourth = Right();
             // codeql[cs/non-short-circuit] measured: a read-only token
-            return fourth & Left();
+            return Left() & fourth;
         }
 
         // c16: a new finding, suppressed with a reason longer than a dismissal comment takes.
