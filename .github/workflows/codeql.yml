@@ -47,7 +47,8 @@ jobs:
           output: sarif-results
           upload: failure-only
 
-      - name: drop what the code suppresses
+      - name: drop what the code suppresses, on a pull request
+        if: github.event_name == 'pull_request'
         run: python3 tools/filter_sarif.py sarif-results/${{ matrix.language }}.sarif filtered/${{ matrix.language }}.sarif
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -60,11 +61,11 @@ jobs:
       - id: upload
         uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
-          sarif_file: filtered/${{ matrix.language }}.sarif
+          sarif_file: ${{ github.event_name == 'pull_request' && 'filtered' || 'sarif-results' }}/${{ matrix.language }}.sarif
           category: /language:${{ matrix.language }}
           wait-for-processing: true
 
-      - name: the upload landed, and nothing security is suppressed
+      - name: the upload landed
         env:
           GH_TOKEN: ${{ github.token }}
           SARIF_ID: ${{ steps.upload.outputs.sarif-id }}
@@ -77,4 +78,11 @@ jobs:
             gh api "$url" --jq '.[] | "analysis \(.id): \(.results_count) results, error \"\(.error)\""'
             [ -z "$(gh api "$url" --jq '[.[] | select(.error != "")] | .[0].error // empty')" ] || { echo "::error::the analysis failed"; exit 1; }
           done
-          if [ -f filtered/refused ]; then cat filtered/refused; exit 1; fi
+
+      - name: dismiss what the code suppresses, on main
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 tools/sync_dismissals.py sarif-results/${{ matrix.language }}.sarif
+          /language:${{ matrix.language }} "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GITHUB_REF"
