@@ -32,3 +32,11 @@ def p5() -> None:
 # p6: an lgtm suppression added by a pull request.
 def p6() -> None:
     value = 1  # lgtm[py/unused-local-variable] measured: put to review
+
+
+# p7: a security finding, suppressed, which the filter refuses.
+def p7() -> object:
+    import ssl
+
+    # codeql[py/insecure-protocol] measured: a security finding suppressed
+    return ssl.SSLContext(ssl.PROTOCOL_TLSv1)

@@ -11,7 +11,6 @@ namespace Probe
         public static int C1()
         {
             var value = Left() ? 1 : 2;
-            // codeql[cs/useless-assignment-to-local] measured: the line before
             value = 4;
             return 0;
         }
@@ -20,6 +19,7 @@ namespace Probe
         public static int C2()
         {
             var value = Left() ? 1 : 2;
+            // codeql[cs/useless-assignment-to-local] measured: added above a finding main has open
             value = 3;
             return 0;
         }
