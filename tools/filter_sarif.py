@@ -10,7 +10,8 @@ import os
 import sys
 
 source, target = sys.argv[1], sys.argv[2]
-sarif = json.load(open(source, encoding="utf-8"))
+with open(source, encoding="utf-8") as stream:
+    sarif = json.load(stream)
 refused = []
 for run in sarif["runs"]:
     rules = {}
@@ -31,7 +32,8 @@ for run in sarif["runs"]:
             print(f'dropped {result["ruleId"]} at {at}')
     run["results"] = kept
 os.makedirs(os.path.dirname(target), exist_ok=True)
-json.dump(sarif, open(target, "w", encoding="utf-8"))
+with open(target, "w", encoding="utf-8") as stream:
+    json.dump(sarif, stream)
 if refused:
     open(os.path.join(os.path.dirname(target), "refused"), "w").write("\n".join(refused))
     for line in refused:
