@@ -35,6 +35,8 @@ os.makedirs(os.path.dirname(target), exist_ok=True)
 with open(target, "w", encoding="utf-8") as stream:
     json.dump(sarif, stream)
 if refused:
-    open(os.path.join(os.path.dirname(target), "refused"), "w").write("\n".join(refused))
+    with open(os.path.join(os.path.dirname(target), "refused"), "w", encoding="utf-8") as stream:
+        stream.write("
+".join(refused))
     for line in refused:
         print(f"::error::a security finding is suppressed, which is refused: {line}")
