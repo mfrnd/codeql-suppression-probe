@@ -1,1 +1,1 @@
-{"step": "R1", "set": "first review", "offset": 0, "batches": [4], "pause": 1, "retry": false}
+{"step": "R2", "set": "outside", "offset": 0, "batches": [1], "pause": 1, "retry": false}
