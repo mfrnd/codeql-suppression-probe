@@ -1,1 +1,1 @@
-{"step": "A", "set": "real", "offset": 0, "batches": [122], "pause": 1, "retry": false}
+{"step": "B1", "set": "bulk", "offset": 0, "batches": [80], "pause": 1, "retry": false}
