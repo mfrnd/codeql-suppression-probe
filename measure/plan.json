@@ -1,1 +1,1 @@
-{"step": "B2", "set": "bulk", "offset": 0, "batches": [40], "pause": 1, "retry": false}
+{"step": "B3", "set": "bulk", "offset": 40, "batches": [60], "pause": 1, "retry": false}
