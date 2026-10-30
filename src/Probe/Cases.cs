@@ -1,4 +1,5 @@
 namespace Probe
+// range probe: near the first line
 {
     // Each method holds one case. The comment above the case names what is measured.
     public static class Cases
@@ -58,6 +59,7 @@ namespace Probe
             value = 3;
             return 0;
         }
+        // range probe: in the middle
 
         // c7: a rule id that is not the one that fires.
         public static int C7()
@@ -99,7 +101,6 @@ namespace Probe
             return 0;
         }
 
-        // c14: a suppression added by a pull request, for the review job.
         public static bool C14()
         {
             var third = Left();
@@ -126,3 +127,4 @@ namespace Probe
         }
     }
 }
+// range probe: at the end of the file

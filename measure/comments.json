@@ -1,0 +1,80 @@
+{
+ "first review": [
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 5,
+   "side": "RIGHT",
+   "body": "Range probe, first review: near the first line, lines 1 to 5 around 2.\n\n<!-- range-probe: first review:near the first line -->",
+   "start_line": 1,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 65,
+   "side": "RIGHT",
+   "body": "Range probe, first review: in the middle, lines 59 to 65 around 62.\n\n<!-- range-probe: first review:in the middle -->",
+   "start_line": 59,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 130,
+   "side": "RIGHT",
+   "body": "Range probe, first review: at the end of the file, lines 127 to 130 around 130.\n\n<!-- range-probe: first review:at the end of the file -->",
+   "start_line": 127,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 105,
+   "side": "LEFT",
+   "body": "Range probe, first review: a removed line, lines 99 to 105 around 102.\n\n<!-- range-probe: first review:a removed line -->",
+   "start_line": 99,
+   "start_side": "LEFT"
+  }
+ ],
+ "second review": [
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 5,
+   "side": "RIGHT",
+   "body": "Range probe, second review: near the first line, lines 1 to 5 around 2.\n\n<!-- range-probe: second review:near the first line -->",
+   "start_line": 1,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 65,
+   "side": "RIGHT",
+   "body": "Range probe, second review: in the middle, lines 59 to 65 around 62.\n\n<!-- range-probe: second review:in the middle -->",
+   "start_line": 59,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 130,
+   "side": "RIGHT",
+   "body": "Range probe, second review: at the end of the file, lines 127 to 130 around 130.\n\n<!-- range-probe: second review:at the end of the file -->",
+   "start_line": 127,
+   "start_side": "RIGHT"
+  },
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 105,
+   "side": "LEFT",
+   "body": "Range probe, second review: a removed line, lines 99 to 105 around 102.\n\n<!-- range-probe: second review:a removed line -->",
+   "start_line": 99,
+   "start_side": "LEFT"
+  }
+ ],
+ "outside": [
+  {
+   "path": "src/Probe/Cases.cs",
+   "line": 65,
+   "side": "RIGHT",
+   "body": "Range probe, outside: reaching outside its hunk, lines 59 to 65 around 62.\n\n<!-- range-probe: outside:reaching outside its hunk -->",
+   "start_line": 57,
+   "start_side": "RIGHT"
+  }
+ ]
+}
