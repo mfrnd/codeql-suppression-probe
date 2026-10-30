@@ -1,1 +1,1 @@
-{"step": "C1", "set": "bulk", "offset": 200, "batches": [81], "pause": 1, "retry": false}
+{"step": "C2", "set": "bulk", "offset": 281, "batches": [20, 20, 20, 20, 20, 20, 20, 20], "pause": 20, "retry": true, "max_retries": 3, "max_wait": 600}
