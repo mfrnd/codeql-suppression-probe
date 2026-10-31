@@ -1,0 +1,39 @@
+name: measure
+
+# Runs KeePassGate's own review against this pull request, twice, with the workflow's own token
+# and the review job's permissions, and prints what became of every note.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: measure
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+
+      - name: KeePassGate's review, twice
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          uv run --no-project --python 3.14 --with tree-sitter==0.26.0
+          --with tree-sitter-c-sharp==0.23.5 --with tree-sitter-python==0.25.0
+          python measure/smoke/smoke.py
