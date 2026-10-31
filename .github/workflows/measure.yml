@@ -30,4 +30,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           HEAD: ${{ github.event.pull_request.head.sha }}
-        run: python3 measure/measure_each.py
+        run: python3 measure/measure_file.py

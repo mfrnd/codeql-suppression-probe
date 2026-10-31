@@ -1,0 +1,3 @@
+[{"label": "a file comment, the too large file", "path": "measure/lines-25000.txt"},
+ {"label": "a file comment, renamed without changes", "path": "README-renamed.md"},
+ {"label": "a file comment, an ordinary file", "path": "measure/a b.cs"}]
