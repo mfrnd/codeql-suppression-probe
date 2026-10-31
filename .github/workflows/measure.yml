@@ -1,7 +1,7 @@
 name: measure
 
-# Resolves three of this pull request's threads with the workflow's own token, with the review
-# job's permissions, and prints GitHub's every answer.
+# Deletes one thread's only comment with the review job's permissions, then tries to resolve threads
+# with `contents: write` added to them, and prints GitHub's every answer.
 
 on:
   pull_request:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  measure:
+  delete:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -26,7 +26,27 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: resolve three threads
+      - name: delete one thread's only comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: python3 measure/measure_delete.py
+
+  resolve:
+    needs: delete
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: resolve three threads with contents write
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
