@@ -17,7 +17,7 @@ def p3() -> None:
     value = 1  # lgtm[py/unused-local-variable] measured: same line
 
 
-# p4: a rule id that is not the one that fires.
+# p4: a rule id that is not the one that fires, in a file renamed with this line changed.
 def p4() -> None:
     # codeql[py/unused-import] measured: the wrong id
     value = 1

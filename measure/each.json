@@ -1,0 +1,201 @@
+[
+ {
+  "label": "renamed, its changed line",
+  "comments": [
+   {
+    "path": "probe_py/renamed_cases.py",
+    "line": 20,
+    "side": "RIGHT",
+    "body": "Files probe: renamed, its changed line.\n\n<!-- files-probe: renamed, its changed line -->"
+   }
+  ]
+ },
+ {
+  "label": "renamed, a range in its hunk",
+  "comments": [
+   {
+    "path": "probe_py/renamed_cases.py",
+    "line": 23,
+    "side": "RIGHT",
+    "body": "Files probe: renamed, a range in its hunk.\n\n<!-- files-probe: renamed, a range in its hunk -->",
+    "start_line": 17,
+    "start_side": "RIGHT"
+   }
+  ]
+ },
+ {
+  "label": "renamed, a line outside its hunk",
+  "comments": [
+   {
+    "path": "probe_py/renamed_cases.py",
+    "line": 40,
+    "side": "RIGHT",
+    "body": "Files probe: renamed, a line outside its hunk.\n\n<!-- files-probe: renamed, a line outside its hunk -->"
+   }
+  ]
+ },
+ {
+  "label": "renamed, the old side by its new name",
+  "comments": [
+   {
+    "path": "probe_py/renamed_cases.py",
+    "line": 20,
+    "side": "LEFT",
+    "body": "Files probe: renamed, the old side by its new name.\n\n<!-- files-probe: renamed, the old side by its new name -->"
+   }
+  ]
+ },
+ {
+  "label": "renamed, the old side by its old name",
+  "comments": [
+   {
+    "path": "probe_py/cases.py",
+    "line": 20,
+    "side": "LEFT",
+    "body": "Files probe: renamed, the old side by its old name.\n\n<!-- files-probe: renamed, the old side by its old name -->"
+   }
+  ]
+ },
+ {
+  "label": "renamed without changes",
+  "comments": [
+   {
+    "path": "README-renamed.md",
+    "line": 1,
+    "side": "RIGHT",
+    "body": "Files probe: renamed without changes.\n\n<!-- files-probe: renamed without changes -->"
+   }
+  ]
+ },
+ {
+  "label": "copied",
+  "comments": [
+   {
+    "path": "src/Probe/Copy.cs",
+    "line": 10,
+    "side": "RIGHT",
+    "body": "Files probe: copied.\n\n<!-- files-probe: copied -->"
+   }
+  ]
+ },
+ {
+  "label": "1000 lines, the last",
+  "comments": [
+   {
+    "path": "measure/lines-1000.txt",
+    "line": 1000,
+    "side": "RIGHT",
+    "body": "Files probe: 1000 lines, the last.\n\n<!-- files-probe: 1000 lines, the last -->"
+   }
+  ]
+ },
+ {
+  "label": "5000 lines, the last",
+  "comments": [
+   {
+    "path": "measure/lines-5000.txt",
+    "line": 5000,
+    "side": "RIGHT",
+    "body": "Files probe: 5000 lines, the last.\n\n<!-- files-probe: 5000 lines, the last -->"
+   }
+  ]
+ },
+ {
+  "label": "25000 lines, the last",
+  "comments": [
+   {
+    "path": "measure/lines-25000.txt",
+    "line": 25000,
+    "side": "RIGHT",
+    "body": "Files probe: 25000 lines, the last.\n\n<!-- files-probe: 25000 lines, the last -->"
+   }
+  ]
+ },
+ {
+  "label": "25000 lines, the first",
+  "comments": [
+   {
+    "path": "measure/lines-25000.txt",
+    "line": 1,
+    "side": "RIGHT",
+    "body": "Files probe: 25000 lines, the first.\n\n<!-- files-probe: 25000 lines, the first -->"
+   }
+  ]
+ },
+ {
+  "label": "a space in the name",
+  "comments": [
+   {
+    "path": "measure/a b.cs",
+    "line": 5,
+    "side": "RIGHT",
+    "body": "Files probe: a space in the name.\n\n<!-- files-probe: a space in the name -->"
+   }
+  ]
+ },
+ {
+  "label": "an accent in the name",
+  "comments": [
+   {
+    "path": "measure/ü.cs",
+    "line": 5,
+    "side": "RIGHT",
+    "body": "Files probe: an accent in the name.\n\n<!-- files-probe: an accent in the name -->"
+   }
+  ]
+ },
+ {
+  "label": "a quote in the name",
+  "comments": [
+   {
+    "path": "measure/q\"t.cs",
+    "line": 5,
+    "side": "RIGHT",
+    "body": "Files probe: a quote in the name.\n\n<!-- files-probe: a quote in the name -->"
+   }
+  ]
+ },
+ {
+  "label": "deleted, the old side",
+  "comments": [
+   {
+    "path": "tools/filter_sarif.py",
+    "line": 10,
+    "side": "LEFT",
+    "body": "Files probe: deleted, the old side.\n\n<!-- files-probe: deleted, the old side -->"
+   }
+  ]
+ },
+ {
+  "label": "no newline, the last line",
+  "comments": [
+   {
+    "path": "measure/noeol.cs",
+    "line": 6,
+    "side": "RIGHT",
+    "body": "Files probe: no newline, the last line.\n\n<!-- files-probe: no newline, the last line -->"
+   }
+  ]
+ },
+ {
+  "label": "two ranges that overlap",
+  "comments": [
+   {
+    "path": "measure/a b.cs",
+    "line": 6,
+    "side": "RIGHT",
+    "body": "Files probe: two ranges that overlap, first.\n\n<!-- files-probe: two ranges that overlap, first -->",
+    "start_line": 1,
+    "start_side": "RIGHT"
+   },
+   {
+    "path": "measure/a b.cs",
+    "line": 8,
+    "side": "RIGHT",
+    "body": "Files probe: two ranges that overlap, second.\n\n<!-- files-probe: two ranges that overlap, second -->",
+    "start_line": 3,
+    "start_side": "RIGHT"
+   }
+  ]
+ }
+]
