@@ -1,7 +1,7 @@
 name: measure
 
-# Posts each review `measure/each.json` lists on this pull request with the workflow's own token,
-# and prints GitHub's every answer.
+# Resolves three of this pull request's threads with the workflow's own token, with the review
+# job's permissions, and prints GitHub's every answer.
 
 on:
   pull_request:
@@ -19,15 +19,15 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      security-events: write
       pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: post the planned reviews
+      - name: resolve three threads
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: python3 measure/measure_file.py
+        run: python3 measure/measure_resolve.py
