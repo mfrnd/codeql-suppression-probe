@@ -1,0 +1,53 @@
+# The probe's stand-in for KeePassGate's gate: the same concurrency group, a listed matrix, and
+# one `gate passed` job needing the rest. Callable, for approach C. A commit whose subject holds
+# [fail] fails it; every check sleeps a minute so that a tag can be pushed while it runs.
+name: gate
+
+on:
+  push:
+    branches: [tag-probe]
+  workflow_call:
+
+concurrency:
+  group: gate-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: what this branch checks
+    runs-on: ubuntu-latest
+    outputs:
+      list: ${{ steps.ask.outputs.list }}
+    steps:
+      - id: ask
+        run: echo 'list=[{"task":"Unit"},{"task":"Lint"}]' >> "$GITHUB_OUTPUT"
+
+  gate:
+    name: ${{ matrix.task }}
+    needs: gates
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.gates.outputs.list) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: |
+          echo "event=$GITHUB_EVENT_NAME ref=$GITHUB_REF sha=$GITHUB_SHA workflow_ref=$GITHUB_WORKFLOW_REF"
+          echo "head: $(git log -1 --format='%H %s')"
+          sleep 60
+          if git log -1 --format=%s | grep -qF '[fail]'; then echo 'failing on purpose'; exit 1; fi
+
+  passed:
+    name: gate passed
+    needs: [gates, gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          LISTED: ${{ needs.gates.result }}
+          CHECKED: ${{ needs.gate.result }}
+        run: test "$LISTED" = success && test "$CHECKED" = success

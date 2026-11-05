@@ -1,0 +1,36 @@
+# Approach E: a workflow that makes the tag with its own token. A push to tag-probe-e asks for one
+# in the commit's subject: "tag <name> <sha> <lightweight|annotated|delete>".
+name: tagger
+
+on:
+  push:
+    branches: [tag-probe-e]
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          read -r word name sha kind <<< "$(git log -1 --format=%s)"
+          echo "asked: $name $sha $kind"
+          echo "checks on $sha, read with GITHUB_TOKEN:"
+          gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs?check_name=gate%20passed" --jq '.check_runs[] | "  \(.name) \(.status) \(.conclusion) app=\(.app.id)"' || echo '  could not read them'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch -q origin "$sha" || true
+          case "$kind" in
+            delete) git push origin ":refs/tags/$name" ;;
+            annotated) git tag -a "$name" -m "probe $name" "$sha" && git push origin "refs/tags/$name" ;;
+            *) git tag "$name" "$sha" && git push origin "refs/tags/$name" ;;
+          esac

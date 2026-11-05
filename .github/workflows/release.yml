@@ -1,0 +1,41 @@
+# The probe's release, on a v tag: what the checks on the commit read as from inside a workflow
+# (approach B's lookup), then the gate called on the tagged commit (approach C), then a publish
+# that needs it.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: what the checks read as
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+      actions: read
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "ref=$GITHUB_REF sha=$GITHUB_SHA actor=$GITHUB_ACTOR"
+          gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" --jq '.check_runs[] | "check \(.name) \(.status) \(.conclusion) app=\(.app.id)"'
+          gh run list -R "$GITHUB_REPOSITORY" --workflow gate.yml --commit "$GITHUB_SHA" --json status,conclusion,event --jq '.[] | "run \(.event) \(.status) \(.conclusion)"'
+
+  gate:
+    uses: ./.github/workflows/gate.yml
+
+  publish:
+    name: publish
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "published $GITHUB_REF at $GITHUB_SHA"
