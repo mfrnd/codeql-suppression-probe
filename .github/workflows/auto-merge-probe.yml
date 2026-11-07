@@ -1,0 +1,56 @@
+# Measures, for KeePassGate's S307: whether auto-merge survives a push by Dependabot, whether the
+# first step of KeePassGate's fixed dependabot-auto-merge.yml switches it off with the job's own
+# token, and what `gh pr merge --disable-auto` does when auto-merge is already off. Its first step
+# is KeePassGate's, word for word.
+
+name: auto-merge-probe
+
+on: pull_request
+
+concurrency:
+  group: auto-merge-probe-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  enable:
+    name: auto-merge for a Dependabot update
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      NUMBER: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: what this head found
+        run: |
+          echo "event ${{ github.event.action }} by ${{ github.actor }} at $SHA"
+          gh pr view "$NUMBER" --json headRefOid,autoMergeRequest
+
+      - name: auto-merge off until this head earns it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          on=$(gh pr view "$NUMBER" --json autoMergeRequest --jq '.autoMergeRequest != null')
+          if [ "$on" = true ]; then
+            gh pr merge "$NUMBER" --disable-auto
+          fi
+
+      - name: what is left
+        run: gh pr view "$NUMBER" --json headRefOid,autoMergeRequest
+
+      - name: switching it off again, when it is off
+        run: |
+          set +e
+          gh pr merge "$NUMBER" --disable-auto
+          echo "exit $?"
