@@ -4,3 +4,18 @@ updates:
     directory: /
     schedule:
       interval: daily
+
+  # KeePassGate's uv entry, on the uv-probe branch: whether a group nothing installs is moved,
+  # and the package named uv within it.
+  - package-ecosystem: uv
+    directory: /
+    target-branch: uv-probe
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    versioning-strategy: lockfile-only
+    groups:
+      python:
+        patterns: ['*']
