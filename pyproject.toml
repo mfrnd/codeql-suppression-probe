@@ -1,0 +1,195 @@
+[project]
+name = "pykeepassgate"
+dynamic = ["version"]
+description = "The reference client for KeePassGate: pairing, and everything the gate serves."
+readme = "src/pykeepassgate/README.md"
+requires-python = ">=3.14"
+license = { text = "MIT" }
+authors = [{ name = "KeePassGate contributors" }]
+keywords = ["keepass", "keepassgate", "mtls", "password-manager"]
+
+# One dependency, and it is the one that cannot be written here. `cryptography` parses the PKCS#12
+# the gate hands over and writes the PEM that `ssl` can load; the standard library reads neither.
+# Everything else, including the command line, is the standard library on purpose: this is the
+# reference implementation, so what it needs is what the protocol needs.
+#
+# The floor is a crash rather than a feature: the wheel's own OpenSSL is what parses the bundle,
+# and in 42.0.0 and 42.0.1 a malformed PKCS#12 segfaults the interpreter where `credentials.py`
+# promises a `ProtocolError`. 48.0.1 is the newest release to fix its bundled OpenSSL, and this
+# client reads a PKCS#12 from a peer on every pairing, so it takes that one.
+dependencies = ["cryptography>=48.0.1"]
+
+[project.scripts]
+pykeepassgate = "pykeepassgate.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mfrnd/KeePassGate"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# The version is not written here. It is `Version` in `Directory.Build.props`, the one place the
+# plugin, this client and the routing document take it from, and hatchling reads it from there.
+# The source distribution carries none of the C# build, and needs none of it: the wheel built from
+# it takes the version from the sdist's own `PKG-INFO`, which is how hatchling builds from one.
+[tool.hatch.version]
+path = "Directory.Build.props"
+pattern = "<Version>(?P<version>[^<]+)</Version>"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pykeepassgate"]
+
+# The sdist default is everything the version control does not ignore, which here is the whole
+# repository: the plugin's C#, its tests, and every design document, inside a package whose whole
+# claim is that it is one dependency and the standard library. Naming the same directory is what
+# stops that.
+#
+# `only-include` rather than `packages`, and the difference is the whole sdist. `packages` rewrites
+# the paths as it copies, so `src/pykeepassgate` arrives as `pykeepassgate` while the project file
+# beside it still says `readme = "src/pykeepassgate/README.md"` and builds its wheel from
+# `src/pykeepassgate`: the sdist cannot be built into a wheel, which is what `uv build` does with
+# it. `only-include` keeps the layout and excludes everything else just as narrowly.
+[tool.hatch.build.targets.sdist]
+only-include = ["src/pykeepassgate", "LICENSE"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.11",
+    "pre-commit>=4",
+    # Only the test that holds this client to the plugin's routing table reads it, and the plugin
+    # writes that table in YAML because its OpenAPI reader ships a YAML parser either way.
+    "pyyaml>=6",
+    "types-pyyaml>=6",
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.6",
+    # Only the release workflow runs it, to check that what it built is a distribution PyPI will
+    # take, on a pull request as well, where nothing is uploaded and nothing else would look.
+    "twine>=6",
+    # Only `tools/suppressions.py` reads them: a grammar of each language CodeQL takes suppressions
+    # in, so that a comment is found where the language has one and never inside a string. Chosen
+    # over Roslyn and `tokenize` once both were built and found the same comments in every file.
+    "tree-sitter>=0.26",
+    "tree-sitter-c-sharp>=0.23.5",
+    "tree-sitter-python>=0.25",
+]
+
+# PROBE-BUILD-GROUP
+# Locked and never installed: what the client's build would be held to.
+build = [
+    "hatchling>=1.27",
+    "uv>=0.13",
+]
+
+
+# ---------------------------------------------------------------------------------------------
+# The checks. One config for one repository, at the root, beside the two that check the prose.
+# ---------------------------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests/pykeepassgate", "tools", "tests/tools"]
+
+[tool.ruff.lint]
+# The default set plus what catches real mistakes in a client that talks to a password manager:
+# bugbear for the traps, security for the ones that matter here, and the import and comprehension
+# rules because they are free.
+select = [
+    "E", "W",      # pycodestyle
+    "E301", "E302", "E303", "E304", "E305", "E306",  # its blank lines, see `preview` below
+    "F",          # pyflakes
+    "I",           # import order
+    "B",           # bugbear
+    "C4",          # comprehensions
+    "UP",          # pyupgrade
+    "S",           # bandit
+    "RUF",         # ruff's own
+    "SIM",         # simplify
+    "PTH",         # pathlib over os.path
+    "RET",         # returns
+    "ARG",         # unused arguments
+    "N",           # naming
+    "D",           # docstrings
+]
+
+# pycodestyle's blank-line rules are preview rules in this ruff, so selecting `E` does not turn
+# them on and a missing blank line would pass. `explicit-preview-rules` keeps every other preview
+# rule out: one runs only when it is selected by its full code.
+#
+# **What it does not keep out is preview behavior.** `preview` also changes how some stable rules
+# check, and under the ruff `uv.lock` pins, 0.16.3, 37 of the rules selected here say they check
+# more with it: the bandit rules on insecure calls flag a reference as well as a call, F401 and F811
+# look further, RUF001 to RUF003 know more ambiguous characters. None of it finds anything in this
+# code, which passes with `--no-preview` as well. But preview behavior is what a ruff release may
+# change with no rule added or selected, so a finding that arrives with an upgrade may come from
+# here, and `--no-preview` is how to tell.
+preview = true
+explicit-preview-rules = true
+
+ignore = [
+    # A one-line summary is required; the blank line after it and the mood of the first word are
+    # not, because this project's comments are sentences rather than a docstring format.
+    "D203", "D212", "D401", "D407", "D413",
+
+    # N818: an exception class should be named `...Error`. Every one of these derives from
+    # `GateError`, which is, and the names are chosen to read at the place they are caught:
+    # `except DatabaseLocked` says what to do about it and `except DatabaseLockedError` does not.
+    # The guideline exists so a reader can tell an exception from a value type, and nothing in
+    # `errors.py` is a value. This is the same call, for the same reason, that `CA1710` gets on the
+    # plugin's side of the protocol.
+    "N818",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# A test says what it does in its name, and it asserts, which `S101` is about. A fake gate is
+# handed every argument whether it reads them or not, which is `ARG`. And a test vector that looks
+# like a credential is an input written down beside its expected output, which is `S105` and its
+# siblings: the whole point of `test_protocol.py` is that these values are public and reproducible.
+"tests/**/*.py" = [
+    "S101", "S105", "S106", "S107",
+    "D100", "D101", "D102", "D103", "D104", "D107",
+    "ARG001", "ARG002", "ARG005",
+]
+
+[tool.ruff.lint.isort]
+# `conftest` is imported by name because the test directory is not a package: making it one would
+# shadow the package under test, which is called the same thing.
+known-first-party = ["pykeepassgate", "conftest"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.mypy]
+python_version = "3.14"
+files = ["src/pykeepassgate", "tests/pykeepassgate", "tools", "tests/tools"]
+mypy_path = "tools"
+strict = true
+# A reference implementation says what it means. These three turn "it type checks" into "it says
+# what it is": no silent `Any` crossing a boundary, no untyped call slipping through, and a warning
+# when an annotation turns out to be unnecessary.
+warn_unreachable = true
+warn_return_any = true
+warn_unused_ignores = true
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests/pykeepassgate", "tests/tools"]
+# The tools are scripts rather than a package, so their tests import them from where they are.
+pythonpath = ["tools"]
+addopts = "--strict-markers --strict-config"
+
+[tool.coverage.run]
+source = ["src/pykeepassgate", "tools"]
+branch = true
+
+[tool.coverage.report]
+# The client is the reference implementation, so an untested path in it is a paragraph of the
+# specification nobody has run.
+fail_under = 90
+show_missing = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

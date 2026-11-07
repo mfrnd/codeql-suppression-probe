@@ -1,0 +1,74 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- The plugin ships as a plain DLL, so C# is not capped at 5 by the plgx recompiler.
+         13 because NUnit 4.6 marks its `Action` overloads with `OverloadResolutionPriority`,
+         which an older language ignores, leaving every lambda passed to `Assert.Throws`
+         matching two overloads. Named rather than `latest`, so a newer SDK changes nothing. -->
+    <LangVersion>13</LangVersion>
+    <TargetFramework>net48</TargetFramework>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- On, because `tools/DocComments.ps1` leans on it: that tool refuses a block that
+         describes two members or has no summary, and leaves two faults to be caught here,
+         malformed XML and a block with no member after it, which is CS1587. It was off, so
+         malformed XML was caught by nobody. CS1591 and CS1573 are the two that demand
+         documentation rather than judge what is written, and those stay off: this is a
+         backstop, not a coverage rule. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <!-- Off for every project, the tests included. KeePass loads a plugin with `LoadFrom`, and its
+         own configuration redirects nothing but KeePass, so the plugin gets no redirects at all. A
+         test project with redirects of its own would load its dependencies in a way the plugin
+         never can, and pass on a binding the product does not have. -->
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <!-- The analyzers, on and enforced. A rule that only warns is a rule nobody obeys, so
+       `TreatWarningsAsErrors` above is what makes these a gate rather than a
+       suggestion. `EnforceCodeStyleInBuild` is the one that is off by default and worth turning on,
+       because it brings the IDE's own style rules into the build, where a machine without the IDE
+       sees them too.
+       See https://learn.microsoft.com/dotnet/fundamentals/code-analysis/overview
+
+       The level is a number rather than `latest`, which means whichever SDK is newest on the
+       machine running the build. With warnings as errors, a rule a newer SDK adds or turns on would
+       then fail a commit nobody changed, and on one machine but not the next. Moving the number is
+       a commit that says why. The analyzers and the compiler still come from the SDK, so a newer
+       one can still find more with a rule that is on; what the number holds still is which rules
+       are on. -->
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>10.0</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- The one place the version is written, for the plugin, PyKeePassGate and the routing
+         document alike, which move together: `CONVENTIONS.md` says how the number moves. The
+         build stamps it on the plugin and writes it into the document's `info.version` as it
+         embeds that, since a YAML file cannot take it from anywhere, and hatchling reads it from
+         here for the client's package. -->
+    <Version>0.1.0</Version>
+    <Product>KeePassGate</Product>
+    <Company>KeePassGate</Company>
+    <Copyright>Copyright (c) KeePassGate contributors</Copyright>
+    <Authors>KeePassGate contributors</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <!-- The KeePass this repository pins, provided by `build.ps1` into a directory named after the
+       version. Read from `keepass.version` rather than written down twice, so that changing the pin
+       changes what an editor build compiles against as well as what the script fetches. Override
+       with `dotnet build -p:KeePassDevDir=...` for a machine that keeps its own somewhere else. -->
+  <PropertyGroup>
+    <KeePassPinnedVersion Condition="Exists('$(MSBuildThisFileDirectory)keepass.version')">$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)keepass.version').Trim())</KeePassPinnedVersion>
+    <KeePassDevDir Condition="'$(KeePassDevDir)' == '' and '$(KeePassPinnedVersion)' != ''">$(MSBuildThisFileDirectory).keepass\$(KeePassPinnedVersion)\</KeePassDevDir>
+    <!-- The separator is added here rather than by rewriting the property, because a property
+         given on the command line is global and cannot be assigned again. -->
+    <KeePassExePath>$([MSBuild]::EnsureTrailingSlash('$(KeePassDevDir)'))KeePass.exe</KeePassExePath>
+  </PropertyGroup>
+
+</Project>
